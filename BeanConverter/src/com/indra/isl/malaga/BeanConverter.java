@@ -92,6 +92,25 @@ public class BeanConverter {
 
             // Instancia de las clases origen.
             fromClass = fromObj.getClass();
+            
+            if (fromClass.isEnum() && clazz.isEnum()) {
+            	try {
+	            	// Find all possible values of source enum type and get the selected one
+	            	Object[] enumConstants = fromObj.getClass().getEnumConstants();
+	            	for (Object enumConstant : enumConstants) {
+	            		if (enumConstant.equals(fromObj)) {
+	            			
+	            			// Using method 'valueOf' of source enum to set the appropriate value in target enum
+	            			Method method = clazz.getMethod("valueOf", String.class);
+	            			return method.invoke(clazz, fromObj.toString());
+	            		}
+	            	}
+            	} catch (Exception e) {
+            		throw new BeanConverterException("Constant " + fromObj.toString() + " not found in enum " + 
+                			clazz.getName(), null);
+            	}
+            }
+            
             /** Clase instanciada. */
             instanceClass = Class.forName(clazz.getName()).newInstance();
 
